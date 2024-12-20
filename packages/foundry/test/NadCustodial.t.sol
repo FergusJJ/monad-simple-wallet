@@ -25,7 +25,7 @@ contract NadCustodialTest is Test {
 
     function setUp() public {
         vm.prank(owner);
-        nadCustodial = new NadCustodial();
+        nadCustodial = new NadCustodial(owner);
         mockToken = new MockERC20("MockToken", "MOCK", 1_000_000);
 
         vm.deal(owner, 100 ether);

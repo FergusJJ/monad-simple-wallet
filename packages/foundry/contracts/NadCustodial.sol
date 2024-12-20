@@ -36,7 +36,7 @@ contract NadCustodial is ReentrancyGuard, Ownable, Pausable {
     error InvalidRecipient();
     error TransferFailed();
 
-    constructor() Ownable(msg.sender) {}
+    constructor(address factoryCaller) Ownable(factoryCaller) {}
 
     receive() external payable whenNotPaused {
         if (msg.value == 0) revert AmountZero();
