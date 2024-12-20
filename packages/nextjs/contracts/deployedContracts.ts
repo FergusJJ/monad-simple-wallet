@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     NadCustodialFactory: {
-      address: "0x9d8ccc558015b37f50d3cdccf64fde9181bd05b8",
+      address: "0x9d8CCc558015b37F50d3CdCcf64fde9181Bd05B8",
       abi: [
         {
           type: "function",
@@ -93,7 +93,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     NadCustodial: {
-      address: "0xba6736bb6533e787c27a2be071b015894827c95d",
+      address: "0x9d8ccc558015b37f50d3cdccf64fde9181bd05b8",
       abi: [
         {
           type: "constructor",
