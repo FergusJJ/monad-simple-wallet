@@ -16,6 +16,7 @@ type uiToken = {
 }
 export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
     const [tokens, setTokens] = useState<uiToken[]>([]);
+    const { getCachedPrice } = usePriceCache();
     const nadCustodialContract = deployedContracts[31337].NadCustodial;
     const { data: tokenAddresses } = useReadContract({
         abi: nadCustodialContract.abi,
@@ -41,8 +42,6 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
         abi: erc20Abi,
         functionName: "name",
     })) : undefined;
-
-
 
     const { data: tokenBalances, error: tokenBalancesError } = useReadContracts({
         contracts: getTokenBalanceCalls ?? [],

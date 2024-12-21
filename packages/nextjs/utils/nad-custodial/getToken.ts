@@ -1,5 +1,4 @@
 const getTokenPrice = async (tokenAddress: string): Promise<number> => {
-
   try {
     //probably need to change this to get the tokens for connected network, not just ethereum
     const response = await fetch(
@@ -13,7 +12,7 @@ const getTokenPrice = async (tokenAddress: string): Promise<number> => {
   }
 };
 
-const getEthPrice = async (): Promise<number> => {
+const getEthPrice = async (_:string): Promise<number> => {
   try {
     const response = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
@@ -26,17 +25,17 @@ const getEthPrice = async (): Promise<number> => {
   }
 };
 
+//this only works for eth, need to find better way for testnet tokens
 const getTokenImage = (tokenAddress: string): string => {
   if (!tokenAddress || tokenAddress === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') {
     return 'https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png';
   }
 
   const sources = [
-    `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${tokenAddress}/logo.png`,
     `https://tokens.1inch.io/v1.1/${tokenAddress}.png`,
   ];
 
   return sources[0];
 };
 
-export { getTokenPrice, getEthPrice, getTokenImage};
+export { getTokenPrice, getEthPrice, getTokenImage };
