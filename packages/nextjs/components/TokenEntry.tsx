@@ -47,8 +47,8 @@ interface TokenListProps {
 
 const TokenList: React.FC<TokenListProps> = ({ children }) => {
   return (
-    <div className="flex flex-col w-full border border-secondary rounded-xl">
-      <div className="flex flex-col w-full h-[844px] overflow-y-auto no-scrollbar">
+    <div className="flex flex-col w-full md:w-auto border border-secondary rounded-xl">
+      <div className="flex flex-col w-full h-[644px] overflow-y-auto no-scrollbar">
         <div className="space-y-2 p-2">
           {children}
         </div>

@@ -4,7 +4,7 @@ import { erc20Abi } from 'viem';
 import deployedContracts from "~~/contracts/deployedContracts";
 import { getTokenImage, getEthPrice, getTokenPrice } from '~~/utils/nad-custodial/getToken';
 import { TokenList, TokenEntry } from "~~/components/TokenEntry";
-import { Integer } from 'type-fest';
+import { usePriceCache } from '~~/utils/nad-custodial/priceCache';
 type TokenBalanceProps = {
     nadCustodialAddress: string
 }
@@ -88,7 +88,13 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
 
             // ETH Balance processing
             if (ethBalance && Number(ethBalance.value) > 0) {
-                const ethPrice = await getEthPrice();
+                const ethPrice = await getCachedPrice(
+                    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    getEthPrice
+                );
+                //some issue with token price display under tokens owned, cba to look at rn
+                console.log(ethPrice);
+                console.log(Number(ethBalance.value));
                 tokenData.push({
                     name: 'ETH',
                     image: getTokenImage("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -103,15 +109,14 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
                 const tokenName = tokenNames[i];
                 const decimals = tokenDecimals[i];
                 const address = tokenAddresses[i];
-                console.log(
-                    `balance${balance}\ntokenName${tokenName}\ndecimals${decimals}\naddress${address}\n`
-                )
-                if (balance && balance.status === "success" && decimals && decimals.status === "success" && tokenName && tokenName.status === "success") {
-                    const tokenPrice = await getTokenPrice(address);
+                if (balance && balance?.status === "success"
+                    && decimals && decimals?.status === "success"
+                    && tokenName && tokenName?.status === "success") {
+                    const tokenPrice = await getCachedPrice(address, getTokenPrice);
                     tokenData.push({
                         name: tokenName.result as string,
                         image: getTokenImage(address),
-                        amount: Number(balance.result) / 10 ** (decimals.result as number),
+                        amount: Number(balance.result) / (10 ** (decimals.result as number)),
                         dollarValue: Number(balance.result) * tokenPrice
                     });
                 }
@@ -121,9 +126,6 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
 
         fetchTokenData();
     }, [tokenAddresses, ethBalance, tokenBalances, tokenNames, tokenDecimals]);
-    console.log(
-        `tokenNames:${tokenNames}\ndecimals:${tokenDecimals}\ntokenBalances:${tokenBalances}`
-    )
     return (
         <TokenList>
             {tokens.map((token, i) => (

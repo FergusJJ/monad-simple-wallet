@@ -82,7 +82,7 @@ export const ContractDeployer: React.FC<ContractDeployerProps> = ({
     if (existingContract && existingContract !== "0x0000000000000000000000000000000000000000") {
         return (
             <div className="flex flex-col gap-4">
-                <div className="flex-1">
+                <div className="flex-1 py-3">
                     <h3 className="font-bold">NadCustodialWallet Exists</h3>
                     <p>Your NadCustodialWallet is at: {deployedContractAddress}</p>
                 </div>
