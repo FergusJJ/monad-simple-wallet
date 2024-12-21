@@ -122,6 +122,17 @@ contract NadCustodial is ReentrancyGuard, Ownable, Pausable {
         emit TokenWithdrawal(recipient, token_, amount);
     }
 
+    function registerToken(address token_) external whenNotPaused {
+        if (blockedTokens[token_]) revert BlockedToken();
+        if (!registeredTokens[token_]) {
+            registeredTokens[token_] = true;
+            tokens.push(token_);
+        }
+
+        uint256 currentBalance = IERC20(token_).balanceOf(address(this));
+        balances[token_] = currentBalance;
+    }
+
     function setTokenBlocked(address token_, bool isBlock) external onlyOwner {
         blockedTokens[token_] = isBlock;
         emit TokenBlockStatusChanged(token_, isBlock);

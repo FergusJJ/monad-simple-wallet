@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../contracts/NadCustodial.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract MockERC20 is ERC20 {
+contract TestERC20 is ERC20 {
     constructor(
         string memory name,
         string memory symbol,
@@ -17,7 +17,7 @@ contract MockERC20 is ERC20 {
 
 contract NadCustodialTest is Test {
     NadCustodial public nadCustodial;
-    MockERC20 public mockToken;
+    TestERC20 public testToken;
 
     address public owner = address(1);
     address public user = address(2);
@@ -26,7 +26,7 @@ contract NadCustodialTest is Test {
     function setUp() public {
         vm.prank(owner);
         nadCustodial = new NadCustodial(owner);
-        mockToken = new MockERC20("MockToken", "MOCK", 1_000_000);
+        testToken = new TestERC20("TestToken", "TEST", 1_000_000);
 
         vm.deal(owner, 100 ether);
         vm.deal(user, 100 ether);
@@ -145,75 +145,75 @@ contract NadCustodialTest is Test {
     }
 
     function testReceiveToken() public {
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.prank(owner);
-        mockToken.approve(address(nadCustodial), 100);
+        testToken.approve(address(nadCustodial), 100);
 
         vm.prank(owner);
-        nadCustodial.receiveToken(address(mockToken), 100);
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 100);
-        assertEq(mockToken.balanceOf(address(nadCustodial)), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 100);
+        assertEq(testToken.balanceOf(address(nadCustodial)), 100);
     }
 
     function testReceiveTokenZeroAmount() public {
         vm.prank(owner);
         vm.expectRevert(NadCustodial.AmountZero.selector);
-        nadCustodial.receiveToken(address(mockToken), 0);
+        nadCustodial.receiveToken(address(testToken), 0);
     }
 
     function testReceiveBlockedToken() public {
         vm.prank(owner);
-        nadCustodial.setTokenBlocked(address(mockToken), true);
+        nadCustodial.setTokenBlocked(address(testToken), true);
 
         vm.prank(owner);
         vm.expectRevert(NadCustodial.BlockedToken.selector);
-        nadCustodial.receiveToken(address(mockToken), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
     }
 
     function testReceiveTokenEmitsEvent() public {
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.prank(owner);
-        mockToken.approve(address(nadCustodial), 100);
+        testToken.approve(address(nadCustodial), 100);
 
         vm.prank(owner);
         vm.expectEmit(true, true, false, true);
-        emit NadCustodial.TokenDeposit(owner, address(mockToken), 100);
-        nadCustodial.receiveToken(address(mockToken), 100);
+        emit NadCustodial.TokenDeposit(owner, address(testToken), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
     }
 
     function testReceiveTokenTwice() public {
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 100);
-        nadCustodial.receiveToken(address(mockToken), 50);
+        testToken.approve(address(nadCustodial), 100);
+        nadCustodial.receiveToken(address(testToken), 50);
 
-        nadCustodial.receiveToken(address(mockToken), 50);
+        nadCustodial.receiveToken(address(testToken), 50);
         vm.stopPrank();
 
         address[] memory tokens = nadCustodial.getTokens();
         assertEq(tokens.length, 1);
-        assertEq(tokens[0], address(mockToken));
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 100);
+        assertEq(tokens[0], address(testToken));
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 100);
     }
 
     function testWithdrawToken() public {
-        mockToken.transfer(owner, 500);
+        testToken.transfer(owner, 500);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
         vm.prank(owner);
-        nadCustodial.withdrawToken(address(mockToken), 200);
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 300);
-        assertEq(mockToken.balanceOf(address(nadCustodial)), 300);
-        assertEq(mockToken.balanceOf(owner), 200);
+        nadCustodial.withdrawToken(address(testToken), 200);
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 300);
+        assertEq(testToken.balanceOf(address(nadCustodial)), 300);
+        assertEq(testToken.balanceOf(owner), 200);
     }
 
     function testWithdrawTokenZeroAmount() public {
         vm.prank(owner);
         vm.expectRevert(NadCustodial.AmountZero.selector);
-        nadCustodial.withdrawToken(address(mockToken), 0);
+        nadCustodial.withdrawToken(address(testToken), 0);
     }
 
     function testWithdrawTokenInsufficientBalance() public {
@@ -225,46 +225,46 @@ contract NadCustodialTest is Test {
                 0
             )
         );
-        nadCustodial.withdrawToken(address(mockToken), 100);
+        nadCustodial.withdrawToken(address(testToken), 100);
     }
 
     function testWithdrawTokenEmitsEvent() public {
-        mockToken.transfer(owner, 500);
+        testToken.transfer(owner, 500);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
         vm.prank(owner);
         vm.expectEmit(true, true, false, true);
-        emit NadCustodial.TokenWithdrawal(owner, address(mockToken), 200);
-        nadCustodial.withdrawToken(address(mockToken), 200);
+        emit NadCustodial.TokenWithdrawal(owner, address(testToken), 200);
+        nadCustodial.withdrawToken(address(testToken), 200);
     }
 
     function testSendToken() public {
-        mockToken.transfer(owner, 500);
+        testToken.transfer(owner, 500);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
         vm.prank(owner);
-        nadCustodial.sendToken(user2, address(mockToken), 200);
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 300);
-        assertEq(mockToken.balanceOf(address(nadCustodial)), 300);
-        assertEq(mockToken.balanceOf(user2), 200);
+        nadCustodial.sendToken(user2, address(testToken), 200);
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 300);
+        assertEq(testToken.balanceOf(address(nadCustodial)), 300);
+        assertEq(testToken.balanceOf(user2), 200);
     }
 
     function testSendTokenZeroAmount() public {
         vm.prank(owner);
         vm.expectRevert(NadCustodial.AmountZero.selector);
-        nadCustodial.sendToken(user2, address(mockToken), 0);
+        nadCustodial.sendToken(user2, address(testToken), 0);
     }
 
     function testSendTokenInvalidRecipient() public {
         vm.prank(owner);
         vm.expectRevert(NadCustodial.InvalidRecipient.selector);
-        nadCustodial.sendToken(address(0), address(mockToken), 100);
+        nadCustodial.sendToken(address(0), address(testToken), 100);
     }
 
     function testSendTokenInsufficientBalance() public {
@@ -276,87 +276,117 @@ contract NadCustodialTest is Test {
                 0
             )
         );
-        nadCustodial.sendToken(user2, address(mockToken), 100);
+        nadCustodial.sendToken(user2, address(testToken), 100);
     }
 
     function testSendTokenEmitsEvent() public {
-        mockToken.transfer(owner, 500);
+        testToken.transfer(owner, 500);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
         vm.prank(owner);
         vm.expectEmit(true, true, false, true);
-        emit NadCustodial.TokenWithdrawal(user2, address(mockToken), 200);
-        nadCustodial.sendToken(user2, address(mockToken), 200);
+        emit NadCustodial.TokenWithdrawal(user2, address(testToken), 200);
+        nadCustodial.sendToken(user2, address(testToken), 200);
+    }
+
+    function testRegisterNewToken() public {
+        testToken.transfer(address(nadCustodial), 100);
+        nadCustodial.registerToken(address(testToken));
+
+        address[] memory tokens = nadCustodial.getTokens();
+        assertEq(tokens.length, 1);
+        assertEq(tokens[0], address(testToken));
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 100);
+    }
+
+    function testRegisterBlockedToken() public {
+        vm.prank(owner);
+        nadCustodial.setTokenBlocked(address(testToken), true);
+
+        vm.expectRevert(NadCustodial.BlockedToken.selector);
+        nadCustodial.registerToken(address(testToken));
+    }
+
+    function testUpdateExistingTokenBalance() public {
+        testToken.transfer(address(nadCustodial), 100);
+        nadCustodial.registerToken(address(testToken));
+
+        testToken.transfer(address(nadCustodial), 50);
+        nadCustodial.registerToken(address(testToken));
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 150);
+        address[] memory tokens = nadCustodial.getTokens();
+        assertEq(tokens.length, 1);
+        assertEq(tokens[0], address(testToken));
     }
 
     function testSetTokenBlocked() public {
         vm.prank(owner);
-        nadCustodial.setTokenBlocked(address(mockToken), true);
-        assertTrue(nadCustodial.isBlockedToken(address(mockToken)));
+        nadCustodial.setTokenBlocked(address(testToken), true);
+        assertTrue(nadCustodial.isBlockedToken(address(testToken)));
 
         vm.prank(owner);
-        nadCustodial.setTokenBlocked(address(mockToken), false);
-        assertFalse(nadCustodial.isBlockedToken(address(mockToken)));
+        nadCustodial.setTokenBlocked(address(testToken), false);
+        assertFalse(nadCustodial.isBlockedToken(address(testToken)));
     }
 
     function testSetTokenBlockedEmitsEvent() public {
         vm.prank(owner);
         vm.expectEmit(true, false, false, true);
-        emit NadCustodial.TokenBlockStatusChanged(address(mockToken), true);
-        nadCustodial.setTokenBlocked(address(mockToken), true);
+        emit NadCustodial.TokenBlockStatusChanged(address(testToken), true);
+        nadCustodial.setTokenBlocked(address(testToken), true);
     }
 
     function testBlockTokenAfterDeposit() public {
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 100);
-        nadCustodial.receiveToken(address(mockToken), 100);
+        testToken.approve(address(nadCustodial), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
 
-        nadCustodial.setTokenBlocked(address(mockToken), true);
+        nadCustodial.setTokenBlocked(address(testToken), true);
         vm.stopPrank();
 
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 100);
+        testToken.approve(address(nadCustodial), 100);
         vm.expectRevert(NadCustodial.BlockedToken.selector);
-        nadCustodial.receiveToken(address(mockToken), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
         vm.stopPrank();
 
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 100);
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 100);
     }
 
     function testGetTokenBalance() public {
-        mockToken.transfer(owner, 1000);
+        testToken.transfer(owner, 1000);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
-        assertEq(nadCustodial.getTokenBalance(address(mockToken)), 500);
+        assertEq(nadCustodial.getTokenBalance(address(testToken)), 500);
     }
 
     function testGetTokens() public {
-        mockToken.transfer(owner, 1000);
+        testToken.transfer(owner, 1000);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
-        mockToken.approve(address(nadCustodial), 500);
-        nadCustodial.receiveToken(address(mockToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
+        testToken.approve(address(nadCustodial), 500);
+        nadCustodial.receiveToken(address(testToken), 500);
         vm.stopPrank();
 
         address[] memory tokens = nadCustodial.getTokens();
         assertEq(tokens.length, 1);
-        assertEq(tokens[0], address(mockToken));
+        assertEq(tokens[0], address(testToken));
     }
 
     function testTokenBalanceUnderflow() public {
-        mockToken.transfer(owner, 100);
+        testToken.transfer(owner, 100);
         vm.startPrank(owner);
-        mockToken.approve(address(nadCustodial), 100);
-        nadCustodial.receiveToken(address(mockToken), 100);
+        testToken.approve(address(nadCustodial), 100);
+        nadCustodial.receiveToken(address(testToken), 100);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -365,7 +395,7 @@ contract NadCustodialTest is Test {
                 100
             )
         );
-        nadCustodial.sendToken(user2, address(mockToken), 101);
+        nadCustodial.sendToken(user2, address(testToken), 101);
         vm.stopPrank();
     }
 }
