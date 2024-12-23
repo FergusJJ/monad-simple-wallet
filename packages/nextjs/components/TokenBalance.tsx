@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useBalance, useReadContract, useReadContracts } from 'wagmi';
-import { erc20Abi } from 'viem';
 import deployedContracts from "~~/contracts/deployedContracts";
 import { getTokenImage, getEthPrice, getTokenPrice } from '~~/utils/nad-custodial/getToken';
 import { TokenList, TokenEntry } from "~~/components/TokenEntry";
 import { usePriceCache } from '~~/utils/nad-custodial/priceCache';
-type TokenBalanceProps = {
+import { useTokenMetadataCache } from '~~/utils/nad-custodial/tokenMetadataCache';
+import { readContractMetadata } from '~~/utils/nad-custodial/readContractUtil';
+
+export type TokenBalanceProps = {
     nadCustodialAddress: string
 }
+
 type uiToken = {
     name: string,
     image: string,
     amount: number,
     dollarValue: number
 }
-export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
+
+const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
     const [tokens, setTokens] = useState<uiToken[]>([]);
     const { getCachedPrice } = usePriceCache();
+    const { getCachedMetadata } = useTokenMetadataCache();
     const nadCustodialContract = deployedContracts[31337].NadCustodial;
     const { data: tokenAddresses } = useReadContract({
         abi: nadCustodialContract.abi,
@@ -31,17 +36,6 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
         args: [tokenAddress],
     })) : undefined;
 
-    const getDecimalsCalls = tokenAddresses ? tokenAddresses.map(tokenAddress => ({
-        address: tokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: "decimals",
-    })) : undefined;
-
-    const getNameCalls = tokenAddresses ? tokenAddresses.map(tokenAddress => ({
-        address: tokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: "name",
-    })) : undefined;
 
     const { data: tokenBalances, error: tokenBalancesError } = useReadContracts({
         contracts: getTokenBalanceCalls ?? [],
@@ -49,33 +43,9 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
             enabled: Boolean(tokenAddresses?.length),
         }
     });
-
-    const { data: tokenDecimals, error: tokenDecimalsError } = useReadContracts({
-        contracts: getDecimalsCalls ?? [],
-        query: {
-            enabled: Boolean(tokenAddresses?.length),
-        }
-    });
-
-    const { data: tokenNames, error: tokenNamesError } = useReadContracts({
-        contracts: getNameCalls ?? [],
-        query: {
-            enabled: Boolean(tokenAddresses?.length),
-        }
-    });
-
     useEffect(() => {
-        if (tokenBalancesError) {
-            console.error("Token balances error: ", tokenBalancesError);
-        }
-        if (tokenDecimalsError) {
-            console.error("Token decimals error: ", tokenDecimalsError);
-        }
-        if (tokenNamesError) {
-            console.error("Token names error: ", tokenNamesError);
-
-        }
-    }, [tokenBalancesError, tokenDecimalsError, tokenNamesError]);
+        console.log("error getting token balance: " + tokenBalancesError);
+    }, [tokenBalancesError]);
 
     const { data: ethBalance } = useBalance({
         address: nadCustodialAddress as `0x${string}`,
@@ -83,18 +53,13 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
 
     useEffect(() => {
         const fetchTokenData = async () => {
-            if (!tokenAddresses || !tokenBalances || !tokenNames || !tokenDecimals) return;
+            if (!tokenAddresses || !tokenBalances) return;
             const tokenData: uiToken[] = [];
-
-            // ETH Balance processing
             if (ethBalance && Number(ethBalance.value) > 0) {
                 const ethPrice = await getCachedPrice(
                     "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
                     getEthPrice
                 );
-                //some issue with token price display under tokens owned, cba to look at rn
-                console.log(ethPrice);
-                console.log(Number(ethBalance.value));
                 tokenData.push({
                     name: 'ETH',
                     image: getTokenImage("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
@@ -105,18 +70,16 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
 
             //rpobably want some defautl image
             for (let i = 0; i < tokenAddresses.length; i++) {
+                const { name, decimals } = await getCachedMetadata(tokenAddresses[i], readContractMetadata)
                 const balance = tokenBalances[i];
-                const tokenName = tokenNames[i];
-                const decimals = tokenDecimals[i];
                 const address = tokenAddresses[i];
                 if (balance && balance?.status === "success"
-                    && decimals && decimals?.status === "success"
-                    && tokenName && tokenName?.status === "success") {
+                    && decimals && name) {
                     const tokenPrice = await getCachedPrice(address, getTokenPrice);
                     tokenData.push({
-                        name: tokenName.result as string,
+                        name: name,
                         image: getTokenImage(address),
-                        amount: Number(balance.result) / (10 ** (decimals.result as number)),
+                        amount: Number(balance.result) / (10 ** (decimals as number)),
                         dollarValue: Number(balance.result) * tokenPrice
                     });
                 }
@@ -125,7 +88,7 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
         };
 
         fetchTokenData();
-    }, [tokenAddresses, ethBalance, tokenBalances, tokenNames, tokenDecimals]);
+    }, [tokenAddresses, ethBalance, tokenBalances]);
     return (
         <TokenList>
             {tokens.map((token, i) => (
@@ -141,3 +104,5 @@ export const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress 
         </TokenList>
     )
 };
+
+export { TokenBalance }
