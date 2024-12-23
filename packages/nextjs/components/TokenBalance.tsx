@@ -8,21 +8,41 @@ import { useTokenMetadataCache } from '~~/utils/nad-custodial/tokenMetadataCache
 import { readContractMetadata } from '~~/utils/nad-custodial/readContractUtil';
 
 export type TokenBalanceProps = {
-    nadCustodialAddress: string
+    nadCustodialAddress: string;
+    listHeight: number;
+    clickable: boolean;
+    handleClick: (tokenSelectData: TokenSelectData) => void;
+}
+
+export type TokenSelectData = {
+    name: string;
+    amount: number;
+    address: string;
+    decimals: number;
 }
 
 type uiToken = {
-    name: string,
-    image: string,
-    amount: number,
-    dollarValue: number
+    name: string;
+    image: string;
+    amount: number;
+    dollarValue: number;
+    address: string;
+    decimals: number;
 }
 
-const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
+const ETHEREUM_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+
+const TokenBalance: React.FC<TokenBalanceProps> = ({ 
+    nadCustodialAddress, 
+    listHeight, 
+    clickable, 
+    handleClick
+}) => {
     const [tokens, setTokens] = useState<uiToken[]>([]);
     const { getCachedPrice } = usePriceCache();
     const { getCachedMetadata } = useTokenMetadataCache();
     const nadCustodialContract = deployedContracts[31337].NadCustodial;
+
     const { data: tokenAddresses } = useReadContract({
         abi: nadCustodialContract.abi,
         address: nadCustodialAddress as `0x${string}`,
@@ -36,16 +56,12 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
         args: [tokenAddress],
     })) : undefined;
 
-
-    const { data: tokenBalances, error: tokenBalancesError } = useReadContracts({
+    const { data: tokenBalances } = useReadContracts({
         contracts: getTokenBalanceCalls ?? [],
         query: {
             enabled: Boolean(tokenAddresses?.length),
         }
     });
-    useEffect(() => {
-        console.log("error getting token balance: " + tokenBalancesError);
-    }, [tokenBalancesError]);
 
     const { data: ethBalance } = useBalance({
         address: nadCustodialAddress as `0x${string}`,
@@ -55,32 +71,36 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
         const fetchTokenData = async () => {
             if (!tokenAddresses || !tokenBalances) return;
             const tokenData: uiToken[] = [];
+            
             if (ethBalance && Number(ethBalance.value) > 0) {
                 const ethPrice = await getCachedPrice(
-                    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    ETHEREUM_ADDRESS,
                     getEthPrice
                 );
                 tokenData.push({
                     name: 'ETH',
-                    image: getTokenImage("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"),
+                    image: getTokenImage(ETHEREUM_ADDRESS),
                     amount: Number(ethBalance.value) / 10 ** ethBalance.decimals,
-                    dollarValue: (Number(ethBalance.value) / 10 ** ethBalance.decimals) * ethPrice
+                    dollarValue: (Number(ethBalance.value) / 10 ** ethBalance.decimals) * ethPrice,
+                    address: ETHEREUM_ADDRESS,
+                    decimals: 18,
                 });
             }
 
-            //rpobably want some defautl image
             for (let i = 0; i < tokenAddresses.length; i++) {
-                const { name, decimals } = await getCachedMetadata(tokenAddresses[i], readContractMetadata)
+                const { name, decimals } = await getCachedMetadata(tokenAddresses[i], readContractMetadata);
                 const balance = tokenBalances[i];
                 const address = tokenAddresses[i];
-                if (balance && balance?.status === "success"
-                    && decimals && name) {
+                
+                if (balance?.status === "success" && decimals && name) {
                     const tokenPrice = await getCachedPrice(address, getTokenPrice);
                     tokenData.push({
                         name: name,
                         image: getTokenImage(address),
                         amount: Number(balance.result) / (10 ** (decimals as number)),
-                        dollarValue: Number(balance.result) * tokenPrice
+                        dollarValue: Number(balance.result) * tokenPrice,
+                        address: tokenAddresses[i],
+                        decimals: decimals,
                     });
                 }
             }
@@ -89,8 +109,9 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
 
         fetchTokenData();
     }, [tokenAddresses, ethBalance, tokenBalances]);
+
     return (
-        <TokenList>
+        <TokenList height={listHeight}>
             {tokens.map((token, i) => (
                 <TokenEntry
                     key={`${token.name}-${i}`}
@@ -99,10 +120,19 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({ nadCustodialAddress }) => {
                     amount={token.amount}
                     dollarValue={token.dollarValue}
                     index={i}
+                    clickable={clickable}
+                    OnClick={() => {
+                        handleClick({
+                            name: token.name,
+                            amount: token.amount,
+                            address: token.address,
+                            decimals: token.decimals,
+                        });
+                    }}
                 />
             ))}
         </TokenList>
-    )
+    );
 };
 
 export { TokenBalance }

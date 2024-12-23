@@ -5,7 +5,9 @@ interface TokenEntryProps {
   image: string;
   amount: number;
   dollarValue: number;
-  index: number
+  index: number;
+  clickable: boolean;
+  OnClick: () => void;
 }
 
 const TokenEntry: React.FC<TokenEntryProps> = ({
@@ -14,11 +16,12 @@ const TokenEntry: React.FC<TokenEntryProps> = ({
   amount,
   dollarValue,
   index,
+  clickable,
+  OnClick,
 }) => {
   const totalValue = (amount * dollarValue).toFixed(2);
-
   return (
-    <div className="flex items-center justify-between p-4 hover:bg-secondary transition-colors" key={index}>
+    <div className={clickable ? "flex items-center justify-between p-4 hover:bg-secondary transition-colors cursor-pointer" : "flex items-center justify-between p-4 hover:bg-secondary transition-colors"} onClick={OnClick} key={index}>
       <div className="flex items-center space-x-3">
         <div className="w-8 h-8 rounded-full overflow-hidden">
           <img
@@ -43,18 +46,19 @@ const TokenEntry: React.FC<TokenEntryProps> = ({
 
 interface TokenListProps {
   children: React.ReactNode;
+  height: number;
 }
 
-const TokenList: React.FC<TokenListProps> = ({ children }) => {
+const TokenList: React.FC<TokenListProps> = ({ children, height}) => {
   return (
     <div className="flex flex-col w-full md:w-auto border border-secondary rounded-xl">
-      <div className="flex flex-col w-full h-[644px] overflow-y-auto no-scrollbar">
+      <div className="flex flex-col w-full overflow-y-auto no-scrollbar" style={{ height: `${height}px` }}>
         <div className="space-y-2 p-2">
           {children}
         </div>
       </div>
     </div>
   );
-};
+};;
 
 export { TokenEntry, TokenList };

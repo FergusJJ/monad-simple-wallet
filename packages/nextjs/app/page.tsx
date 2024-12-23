@@ -30,30 +30,22 @@ const Home: NextPage = () => {
 
   const renderActivePage = () => {
     switch (activePage) {
-      case "home":
-        return <TokenBalance nadCustodialAddress={deployedContractAddress} />;
       case "send":
-        return <SendFunds />
+        return <SendFunds address={deployedContractAddress} />
       case "deposit":
         return <DepositFunds />
       case "actions":
         return <WalletActionsComponent />
       default:
-        return <TokenBalance nadCustodialAddress={deployedContractAddress} />;
+        return <TokenBalance nadCustodialAddress={deployedContractAddress} listHeight={844} clickable={false} handleClick={()=> {}} />;
     }
   };
 
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
-        <div>
-          <Address address={connectedAddress}></Address>
-        </div>
-        <div className="flex flex-row">
-          <p className="">{deployedContractAddress}
-          </p>
-        </div>
         <div className="flex flex-col flex-grow pt-5 w-full max-w-4xl px-4">
+          <h2>{deployedContractAddress}</h2>
           {renderActivePage()}
         </div>
         {
