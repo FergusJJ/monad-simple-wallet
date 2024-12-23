@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { TokenBalance, TokenSelectData } from "./TokenBalance";
+import React, { useState, useEffect } from "react"; import { TokenBalance, TokenSelectData } from "./TokenBalance";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseEther, parseUnits } from "viem";
 import deployedContracts from "~~/contracts/deployedContracts";
@@ -20,7 +19,7 @@ export const SendFunds: React.FC<sendProps> = ({ address }) => {
     const { writeContractAsync } = useWriteContract();
     const [txHash, setTxHash] = useState<string>();
 
-    useWaitForTransactionReceipt({ 
+    useWaitForTransactionReceipt({
         hash: txHash as `0x${string}`
     });
 
@@ -40,8 +39,8 @@ export const SendFunds: React.FC<sendProps> = ({ address }) => {
         try {
             const parsedAmount = selectedToken.address === ETHEREUM_ADDRESS ?
                 parseEther(amount) :
-                parseUnits(amount, selectedToken.decimals || 18);
-            
+                BigInt(parseInt(amount) * (10**selectedToken.decimals));
+
             const [functionName, functionArgs] = sendAddress ?
                 selectedToken.address === ETHEREUM_ADDRESS ?
                     ["send" as const, [sendAddress, parsedAmount] as const] :
@@ -117,7 +116,7 @@ export const SendFunds: React.FC<sendProps> = ({ address }) => {
                             step="any"
                             min="0"
                             placeholder="0.0"
-                            className={`input input-bordered w-full ${parseFloat(amount) > 0 && parseFloat(amount) > selectedToken.amount ? "border-red-500" : "border-green-500"}`}
+                            className={`input input-bordered w-full ${parseFloat(amount) <= 0 && parseFloat(amount) > selectedToken.amount ? "border-red-500" : "border-green-500"}`}
                             value={amount}
                             onChange={e => setAmount(e.target.value)}
                             style={{
