@@ -32,10 +32,10 @@ type uiToken = {
 
 const ETHEREUM_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 
-const TokenBalance: React.FC<TokenBalanceProps> = ({ 
-    nadCustodialAddress, 
-    listHeight, 
-    clickable, 
+const TokenBalance: React.FC<TokenBalanceProps> = ({
+    nadCustodialAddress,
+    listHeight,
+    clickable,
     handleClick
 }) => {
     const [tokens, setTokens] = useState<uiToken[]>([]);
@@ -48,6 +48,7 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({
         address: nadCustodialAddress as `0x${string}`,
         functionName: "getTokens",
     });
+
 
     const getTokenBalanceCalls = tokenAddresses ? tokenAddresses.map(tokenAddress => ({
         abi: nadCustodialContract.abi,
@@ -68,10 +69,14 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({
     });
 
     useEffect(() => {
+        console.log("In useEffect");
+        console.log("------");
+        console.log(tokenAddresses);
+        console.log(ethBalance);
+        console.log(tokenBalances);
         const fetchTokenData = async () => {
-            if (!tokenAddresses || !tokenBalances) return;
             const tokenData: uiToken[] = [];
-            
+            console.log(`eth balance: ${ethBalance}`);
             if (ethBalance && Number(ethBalance.value) > 0) {
                 const ethPrice = await getCachedPrice(
                     ETHEREUM_ADDRESS,
@@ -87,23 +92,26 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({
                 });
             }
 
-            for (let i = 0; i < tokenAddresses.length; i++) {
-                const { name, decimals } = await getCachedMetadata(tokenAddresses[i], readContractMetadata);
-                const balance = tokenBalances[i];
-                const address = tokenAddresses[i];
-                
-                if (balance?.status === "success" && decimals && name) {
-                    const tokenPrice = await getCachedPrice(address, getTokenPrice);
-                    tokenData.push({
-                        name: name,
-                        image: getTokenImage(address),
-                        amount: Number(balance.result) / (10 ** (decimals as number)),
-                        dollarValue: Number(balance.result) * tokenPrice,
-                        address: tokenAddresses[i],
-                        decimals: decimals,
-                    });
-                }
+            if (tokenAddresses && tokenBalances) {
+                for (let i = 0; i < tokenAddresses.length; i++) {
+                    const { name, decimals } = await getCachedMetadata(tokenAddresses[i], readContractMetadata);
+                    const balance = tokenBalances[i];
+                    const address = tokenAddresses[i];
+
+                    if (balance?.status === "success" && decimals && name) {
+                        const tokenPrice = await getCachedPrice(address, getTokenPrice);
+                        tokenData.push({
+                            name: name,
+                            image: getTokenImage(address),
+                            amount: Number(balance.result) / (10 ** (decimals as number)),
+                            dollarValue: Number(balance.result) * tokenPrice,
+                            address: tokenAddresses[i],
+                            decimals: decimals,
+                        });
+                    }
+                };
             }
+
             setTokens(tokenData);
         };
 

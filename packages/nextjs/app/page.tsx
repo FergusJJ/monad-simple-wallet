@@ -45,7 +45,7 @@ const Home: NextPage = () => {
       case "actions":
         return <WalletActionsComponent address={deployedContractAddress} />
       case "activity":
-        return <WalletActivity address={deployedContractAddress} />
+        return <WalletActivity address={deployedContractAddress} connectedAccount={connectedAddress === undefined ? "" : connectedAddress} />
       default:
         return <TokenBalance nadCustodialAddress={deployedContractAddress} listHeight={844} clickable={false} handleClick={() => { }} />;
     }

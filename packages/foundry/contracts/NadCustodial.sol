@@ -54,7 +54,7 @@ contract NadCustodial is ReentrancyGuard, Ownable, Pausable {
         (bool success, ) = payable(owner()).call{value: amount}("");
         if (!success) revert TransferFailed();
 
-        emit EthWithdrawal(owner(), amount);
+        emit EthWithdrawal(msg.sender, amount);
     }
 
     function send(
@@ -102,7 +102,7 @@ contract NadCustodial is ReentrancyGuard, Ownable, Pausable {
             balances[token_] -= amount;
         }
         IERC20(token_).safeTransfer(owner(), amount);
-        emit TokenWithdrawal(owner(), token_, amount);
+        emit TokenWithdrawal(msg.sender, token_, amount);
     }
 
     function sendToken(

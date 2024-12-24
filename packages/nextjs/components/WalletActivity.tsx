@@ -4,17 +4,20 @@ import { useEventCache } from "~~/utils/nad-custodial/eventCache";
 import { fetchWalletEvents } from "~~/utils/nad-custodial/getEvent";
 import { ActivityEvent, ActivityItem } from "~~/utils/nad-custodial/types";
 import { ArrowUpCircle, ArrowDownCircle, Lock, Unlock, Pause, Play } from "lucide-react";
+import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 type activityEventProps = {
     activity: ActivityItem;
     address: string;
+    connectedAccount: string;
 }
 
 type walletActivityProps = {
     address: string;
+    connectedAccount: string;
 };
 
-const ActivityElement: React.FC<activityEventProps> = ({ activity }) => {
+const ActivityElement: React.FC<activityEventProps> = ({ activity, connectedAccount }) => {
     const getIcon = () => {
         switch (activity.event) {
             case ActivityEvent.EthDeposit:
@@ -45,7 +48,8 @@ const ActivityElement: React.FC<activityEventProps> = ({ activity }) => {
                 year: "numeric"
             })
             : "";
-
+        console.log("connected account: " + connectedAccount);
+        console.log(`${activity.event}: ${activity.data.to} ${!!activity.data.to}`);
         switch (activity.event) {
             case ActivityEvent.EthDeposit:
                 return {
@@ -55,7 +59,7 @@ const ActivityElement: React.FC<activityEventProps> = ({ activity }) => {
             case ActivityEvent.EthWithdrawal:
                 return {
                     primary: <span className="text-red-500">-{amount} ETH</span>,
-                    secondary: <span>to {activity.data.to}</span>
+                    secondary: <span>to {activity.data.to === undefined ? connectedAccount : activity.data.to}</span>
                 };
             case ActivityEvent.TokenDeposit:
                 return {
@@ -65,7 +69,7 @@ const ActivityElement: React.FC<activityEventProps> = ({ activity }) => {
             case ActivityEvent.TokenWithdrawal:
                 return {
                     primary: <span className="text-red-500">-{amount} {token}</span>,
-                    secondary: <span>to {activity.data.to}</span>
+                    secondary: <span>to {activity.data.to === undefined ? connectedAccount : activity.data.to} </span>
                 };
             case ActivityEvent.ContractPaused:
             case ActivityEvent.ContractUnpaused:
@@ -104,7 +108,7 @@ const ActivityElement: React.FC<activityEventProps> = ({ activity }) => {
     );
 }
 
-export const WalletActivity: React.FC<walletActivityProps> = ({ address }) => {
+export const WalletActivity: React.FC<walletActivityProps> = ({ address, connectedAccount }) => {
     const [loading, setLoading] = useState(true);
     const { getCachedEvents } = useEventCache();
     const [events, setEvents] = useState<ActivityItem[]>([]);
@@ -133,6 +137,7 @@ export const WalletActivity: React.FC<walletActivityProps> = ({ address }) => {
                     key={`${activity.transactionHash}-${index}`}
                     activity={activity}
                     address={address}
+                    connectedAccount={connectedAccount}
                 />
             ))}
         </div>
