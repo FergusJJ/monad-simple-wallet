@@ -1,9 +1,10 @@
 import { erc20Abi, createPublicClient, http } from 'viem';
 import { CachedMetadata } from './tokenMetadataCache';
-import { optimismSepolia } from 'viem/chains';
+import { optimismSepolia, foundry } from 'viem/chains';
 
 
 const client = createPublicClient({
+    //chain: foundry,
     chain: optimismSepolia,
     transport: http()
 });

@@ -15,7 +15,6 @@ const Home: NextPage = () => {
   const { address: connectedAddress, isConnected } = useAccount();
   const [deployedContractAddress, setDeployedContractAddress] = useState<string>("");
   const [activePage, setActivePage] = useState<string>("home");
-  const [showCopyNotification, setShowCopyNotification] = useState(false);
 
   const handleContractAddressChange = (address: string) => {
     setDeployedContractAddress(address);
@@ -44,7 +43,7 @@ const Home: NextPage = () => {
       case "deposit":
         return <DepositFunds address={deployedContractAddress} />
       case "actions":
-        return <WalletActionsComponent address={deployedContractAddress}/>
+        return <WalletActionsComponent address={deployedContractAddress} />
       case "activity":
         return <WalletActivity address={deployedContractAddress} />
       default:
@@ -68,18 +67,23 @@ const Home: NextPage = () => {
           <div className="flex flex-col w-full max-w-4xl px-4 pb-20">
             {renderActivePage()}
           </div>
-        </div>
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-base-100 ">
-        <div className="max-w-4xl mx-auto">
+
           {deployedContractAddress !== "" && deployedContractAddress !== "0x0000000000000000000000000000000000000000" ? (
-            <ActionSelector activePage={activePage} setPage={handleActivePageChange} />
+            <></>
           ) : (
             <ContractDeployer
               deployedContractAddress={deployedContractAddress}
               setDeployedContractAddress={handleContractAddressChange}
             />
           )}
+
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-base-100 ">
+        <div className="max-w-4xl mx-auto">
+          {deployedContractAddress !== "" && deployedContractAddress !== "0x0000000000000000000000000000000000000000" ? (
+            <ActionSelector activePage={activePage} setPage={handleActivePageChange} />
+          ) : (<></>)}
         </div>
       </div>
     </div>
