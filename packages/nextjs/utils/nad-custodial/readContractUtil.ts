@@ -4,8 +4,8 @@ import { optimismSepolia, foundry } from 'viem/chains';
 
 
 const client = createPublicClient({
-    chain: foundry,
-    //chain: optimismSepolia,
+    //chain: foundry,
+    chain: optimismSepolia,
     transport: http()
 });
 

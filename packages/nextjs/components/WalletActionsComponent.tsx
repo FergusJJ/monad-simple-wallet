@@ -12,7 +12,7 @@ export const WalletActionsComponent: React.FC<walletActionsComponentProps> = ({ 
     const [tokenAddress, setTokenAddress] = useState<string>("");
     const [txHash, setTxHash] = useState<string>();
     const [isSending, setIsSending] = useState<boolean>(false);
-    const nadCustodialContract = deployedContracts[31337].NadCustodial;
+    const nadCustodialContract = deployedContracts[11155420].NadCustodial;
     const { writeContractAsync } = useWriteContract();
     const { data: isPaused } = useReadContract({
         address: address as `0x${string}`,

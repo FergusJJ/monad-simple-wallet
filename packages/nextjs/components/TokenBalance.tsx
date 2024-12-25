@@ -41,7 +41,7 @@ const TokenBalance: React.FC<TokenBalanceProps> = ({
     const [tokens, setTokens] = useState<uiToken[]>([]);
     const { getCachedPrice } = usePriceCache();
     const { getCachedMetadata } = useTokenMetadataCache();
-    const nadCustodialContract = deployedContracts[31337].NadCustodial;
+    const nadCustodialContract = deployedContracts[11155420].NadCustodial;
 
     const { data: tokenAddresses } = useReadContract({
         abi: nadCustodialContract.abi,

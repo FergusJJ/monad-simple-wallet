@@ -4,8 +4,8 @@ import deployedContracts from "~~/contracts/deployedContracts";
 import { ActivityItem, ActivityEvent } from './types';
 
 export const client = createPublicClient({
-    chain: foundry,
-    //chain: optimismSepolia,
+    //chain: foundry,
+    chain: optimismSepolia,
     transport: http()
 });
 
@@ -20,7 +20,7 @@ export async function fetchWalletEvents(
 ): Promise<fetchWalletRet> {
     try {
         const mostRecentBlock = await client.getBlockNumber();
-        const nadCustodialContract = deployedContracts[31337].NadCustodial;
+        const nadCustodialContract = deployedContracts[11155420].NadCustodial;
         console.log(`getting events for address: ${address}`);
         const [
             ethDeposits,

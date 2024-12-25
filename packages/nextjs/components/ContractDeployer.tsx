@@ -15,7 +15,7 @@ export const ContractDeployer: React.FC<ContractDeployerProps> = ({
     const { address: userAddress } = useAccount();
     const { writeContractAsync } = useWriteContract();
     const [isDeploying, setIsDeploying] = useState(false);
-    const factoryContract = deployedContracts[31337].NadCustodialFactory;
+    const factoryContract = deployedContracts[11155420].NadCustodialFactory;
     const { data: existingContract, refetch: refetchContract } = useReadContract({
         abi: factoryContract.abi,
         address: factoryContract.address,

@@ -13,7 +13,7 @@ export const DepositFunds: React.FC<depositProps> = ({ address }) => {
     const [tokenAddress, setTokenAddress] = useState<string>("");
     const [amount, setAmount] = useState<string>("");
     const [isSending, setIsSending] = useState<boolean>(false);
-    const nadCustodialContract = deployedContracts[31337].NadCustodial;
+    const nadCustodialContract = deployedContracts[11155420].NadCustodial;
     const { writeContractAsync } = useWriteContract();
     const { sendTransactionAsync } = useSendTransaction();
     const [txHash, setTxHash] = useState<string>();

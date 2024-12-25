@@ -39,7 +39,7 @@ export const BlockedTokenContainer: React.FC<BlockedTokenContainerProps> = ({ he
     const [tokenAddress, setTokenAddress] = useState<string>("");
     const [txHash, setTxHash] = useState<string>();
     const [isSending, setIsSending] = useState<boolean>(false);
-    const nadCustodialContract = deployedContracts[31337].NadCustodial;
+    const nadCustodialContract = deployedContracts[11155420].NadCustodial;
     const { writeContractAsync } = useWriteContract();
     useWaitForTransactionReceipt({
         hash: txHash as `0x${string}`
