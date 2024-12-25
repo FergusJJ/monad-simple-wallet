@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface TokenEntryProps {
+type TokenEntryProps = {
   name: string;
   image: string;
   amount: number;

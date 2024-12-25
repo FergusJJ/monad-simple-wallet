@@ -30,7 +30,7 @@ export const ActionSelector: React.FC<ActionSelectorProps> = ({ activePage, setP
                 onClick={() => setPage("activity")}
                 className="flex-1 p-4 hover:bg-secondary transition-colors flex items-center justify-center"
             >
-                <Activity className={activePage === "actions" ? "text-purple-500 w-6 h-6" : "text-gray-500 w-6 h-6"} />
+                <Activity className={activePage === "activity" ? "text-purple-500 w-6 h-6" : "text-gray-500 w-6 h-6"} />
             </button>
             <button
                 onClick={() => setPage("actions")}

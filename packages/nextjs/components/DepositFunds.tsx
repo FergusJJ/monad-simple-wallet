@@ -40,14 +40,12 @@ export const DepositFunds: React.FC<depositProps> = ({ address }) => {
             const parsedAmount = parseEther(amount);
             
             if (!tokenAddress) {
-                // For ETH deposits - direct transfer
                 const hash = await sendTransactionAsync({
                     to: walletAddress,
                     value: parsedAmount,
                 });
                 setTxHash(hash);
             } else {
-                // For token deposits
                 const hash = await writeContractAsync({
                     abi: nadCustodialContract.abi,
                     address: walletAddress,

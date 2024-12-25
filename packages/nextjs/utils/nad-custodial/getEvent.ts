@@ -2,7 +2,6 @@ import { createPublicClient, http } from 'viem';
 import { foundry, optimismSepolia } from 'viem/chains';
 import deployedContracts from "~~/contracts/deployedContracts";
 import { ActivityItem, ActivityEvent } from './types';
-import { LassoSelect } from 'lucide-react';
 
 export const client = createPublicClient({
     chain: foundry,

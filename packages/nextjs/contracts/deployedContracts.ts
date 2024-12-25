@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     NadCustodialFactory: {
-      address: "0x629244cB2f54AED67d2a553df2698825660D01A1",
+      address: "0xFF54e26939da8a38c6A3a82a7f04EA41F3348BE7",
       abi: [
         {
           type: "function",
@@ -93,7 +93,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     NadCustodial: {
-      address: "0xA7bb0501D64c7cFB1d5063c50EFf721d902a180b",
+      address: "0x0D167AB4De05E1b1e5f29334D03f193525d556F4",
       abi: [
         {
           type: "constructor",
@@ -605,7 +605,14 @@ const deployedContracts = {
           inputs: [],
         },
       ],
-      inheritedFunctions: {},
+      inheritedFunctions: {
+        owner: "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        renounceOwnership:
+          "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        transferOwnership:
+          "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        paused: "lib/openzeppelin-contracts/contracts/utils/Pausable.sol",
+      },
     },
   },
 } as const;
