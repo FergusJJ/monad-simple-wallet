@@ -19,7 +19,8 @@ export async function fetchWalletEvents(
     fromBlock: bigint
 ): Promise<fetchWalletRet> {
     try {
-        const mostRecentBlock = await client.getBlockNumber();
+        const toBlock = await client.getBlockNumber();
+        const fromBlock = toBlock - BigInt(60 * 30);
         const nadCustodialContract = deployedContracts[11155420].NadCustodial;
         console.log(`getting events for address: ${address}`);
         const [
@@ -36,41 +37,48 @@ export async function fetchWalletEvents(
                 abi: nadCustodialContract.abi,
                 eventName: "EthDeposit",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "EthWithdrawal",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "TokenDeposit",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "TokenWithdrawal",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "ContractPaused",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "ContractUnpaused",
                 fromBlock: fromBlock,
+                toBlock: toBlock,
             }),
             client.getContractEvents({
                 address: address,
                 abi: nadCustodialContract.abi,
                 eventName: "TokenBlockStatusChanged",
+                toBlock: toBlock,
                 fromBlock: fromBlock,
             }),
         ]);
@@ -157,7 +165,7 @@ export async function fetchWalletEvents(
         console.log("activities\n------");
         console.log(activities);
         return {
-            items: activities, mostRecentBlock: mostRecentBlock
+            items: activities, mostRecentBlock: toBlock
         };
     } catch (error) {
         console.error('Error fetching wallet events:', error);
@@ -169,5 +177,35 @@ export async function fetchWalletEvents(
             });
         }
         throw error;
+    }
+}
+
+export async function fetchWalletEventsTest(address: string, numBlocks: bigint) {
+    //30 blocks / min
+    const toBlock = await client.getBlockNumber(); // 21713963
+    const fromBlock = toBlock - numBlocks; //BigInt(30 * 60); //should get past hour
+    const nadCustodialContract = deployedContracts[11155420].NadCustodial;
+    //console.log(`in test: getting events for address: ${address}`);
+    console.log(`block range: ${fromBlock}->${toBlock}`);
+    if (fromBlock > toBlock) {
+        console.log("bad block range");
+        return [];
+    };
+    try {
+        const contractCall = { address: address, abi: nadCustodialContract.abi, eventName: "EthDeposit" as "EthDeposit", fromBlock: fromBlock, toBlock: toBlock };
+        //console.log(`getting event: ${JSON.stringify(contractCall, ((k, v) => {
+        //    if (typeof v === "bigint") {
+        //        return Number(v);
+        //    }
+        //    return v;
+        //}))}`);
+        const [ethDeposits] = await Promise.all([
+            client.getContractEvents(contractCall)]);
+        return ethDeposits;
+    } catch (error) {
+        console.log("start catch:");
+        console.log("failed to get contract events");
+        console.log(error);
+        console.log("end catch");
     }
 }

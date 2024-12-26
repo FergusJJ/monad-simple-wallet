@@ -10,6 +10,7 @@ import { SendFunds } from "~~/components/SendFunds";
 import { DepositFunds } from "~~/components/DepositFunds";
 import { WalletActionsComponent } from "~~/components/WalletActionsComponent";
 import { WalletActivity } from "~~/components/WalletActivity";
+import { fetchWalletEventsTest } from "~~/utils/nad-custodial/getEvent";
 
 const Home: NextPage = () => {
   const { address: connectedAddress, isConnected } = useAccount();
@@ -35,6 +36,12 @@ const Home: NextPage = () => {
       setDeployedContractAddress("");
     }
   }, [isConnected]);
+
+  const testGetEvents = async () => {
+    const numBlocks = BigInt(30 * 60 * Math.floor(Math.random() * 2)+1)
+    const events = await fetchWalletEventsTest(deployedContractAddress, numBlocks);
+    console.log(events);
+  };
 
   const renderActivePage = () => {
     switch (activePage) {

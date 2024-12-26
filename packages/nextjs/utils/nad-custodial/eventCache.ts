@@ -50,14 +50,14 @@ export const useEventCache = () => {
         const oldEvents = !!currentCache?.walletEvents ? currentCache.walletEvents : []
         console.log(`num old events: ${oldEvents.length}`);
         const newEvents = [...items, ...oldEvents].sort((a, b) =>
-            Number(b.blockNumber - a.blockNumber)
+            Number(b.blockNumber) - Number(a.blockNumber)
         );
 
         setEventCache(prev => ({
             ...prev,
             [address]: {
                 lastFetchedBlock: Number(mostRecentBlock),
-                expiry: now + 10000,//REFETCH_DURATION,
+                expiry: now  + REFETCH_DURATION,
                 walletEvents: newEvents
             }
         }));
